@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/MarcusMJV/snapsys.git/internal/metrics"
 	"github.com/spf13/cobra"
 )
 
@@ -41,21 +42,33 @@ func init() {
 }
 
 func runSnapshot() {
-	fmt.Println("running snap shot")
-	// fmt.Printf("running snapshot every %v for %v saving %v", interval, duration, output)
 
+	//set timer and intervals
+	endTime := time.Now().Add(duration)
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	done := time.After(duration)
+	prevCpuSnap, err := metrics.ReadCPUStats()
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	for {
-		select {
-		case <-done:
-			fmt.Println("Snap run completed")
-		case t := <-ticker.C:
-			fmt.Println("Taking Snapshot: ", t)
+	for now := range ticker.C {
+		if now.After(endTime) {
+			fmt.Println("Sbnap run completed")
+			break
 		}
 
+		cpuSnap, err := metrics.ReadCPUStats()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		cpuUsage := metrics.CalculateCpuUsage(prevCpuSnap, cpuSnap)
+		prevCpuSnap = cpuSnap
+		fmt.Println("CPU Percentage: ", cpuUsage)
+		// fmt.Printf("CPU: User:%v, System=%v, Idle=%v", cpu.User, cpu.System, cpu.Idle)
+
 	}
+
 }
