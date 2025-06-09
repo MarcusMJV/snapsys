@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/MarcusMJV/snapsys.git/internal/metrics"
+	"github.com/MarcusMJV/snapsys.git/internal/output"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +17,7 @@ type Snapshot struct {
 
 var interval time.Duration
 var duration time.Duration
-var output string
+var outputFile string
 
 // snapshotCmd represents the snapshot command
 var snapshotCmd = &cobra.Command{
@@ -38,12 +39,11 @@ func init() {
 	rootCmd.AddCommand(snapshotCmd)
 	snapshotCmd.Flags().DurationVar(&interval, "interval", 5*time.Second, "Interval between snapshots")
 	snapshotCmd.Flags().DurationVar(&duration, "duration", 1*time.Minute, "Total duration to run snapshots")
-	snapshotCmd.Flags().StringVar(&output, "output", "snapshot.json", "Output file path")
+	snapshotCmd.Flags().StringVar(&outputFile, "output", "snapshot.json", "Output file path")
 }
 
 func runSnapshot() {
 
-	//set timer and intervals
 	endTime := time.Now().Add(duration)
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
@@ -52,6 +52,8 @@ func runSnapshot() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	var snapshots []output.Snapshot
 
 	for now := range ticker.C {
 		if now.After(endTime) {
@@ -67,8 +69,15 @@ func runSnapshot() {
 		cpuUsage := metrics.CalculateCpuUsage(prevCpuSnap, cpuSnap)
 		prevCpuSnap = cpuSnap
 		fmt.Println("CPU Percentage: ", cpuUsage)
-		// fmt.Printf("CPU: User:%v, System=%v, Idle=%v", cpu.User, cpu.System, cpu.Idle)
 
+		snapshots = append(snapshots, output.Snapshot{Timestamp: now, CPUUsage: cpuUsage})
+
+	}
+
+	if err := output.WriteSnapshotsToFile(snapshots, outputFile); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Output written to: ", outputFile)
 	}
 
 }
