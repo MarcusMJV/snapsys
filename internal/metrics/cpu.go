@@ -9,24 +9,29 @@ import (
 )
 
 type CPUStats struct {
-	User    uint64
-	Nice    uint64
-	System  uint64
-	Idle    uint64
-	IOWait  uint64
-	IRQ     uint64
-	SoftIRQ uint64
+	UsagePct float64     `json:"usage_pct"`
+	Raw      CPUStatsRaw `json:"raw"`
 }
 
-func (cpu *CPUStats) Total() uint64 {
+type CPUStatsRaw struct {
+	User    uint64 `json:"user"`
+	Nice    uint64 `json:"nice"`
+	System  uint64 `json:"system"`
+	Idle    uint64 `json:"idle"`
+	IOWait  uint64 `json:"iowait"`
+	IRQ     uint64 `json:"irq"`
+	SoftIRQ uint64 `json:"softirq"`
+}
+
+func (cpu *CPUStatsRaw) Total() uint64 {
 	return cpu.User + cpu.Nice + cpu.System + cpu.Idle + cpu.IOWait + cpu.IRQ + cpu.SoftIRQ
 }
 
-func (cpu *CPUStats) IdleTime() uint64 {
+func (cpu *CPUStatsRaw) IdleTime() uint64 {
 	return cpu.Idle + cpu.IOWait
 }
 
-func CalculateCpuUsage(cpuSnap1, cpuSnap2 CPUStats) float64 {
+func CalculateCpuUsage(cpuSnap1, cpuSnap2 CPUStatsRaw) float64 {
 	deltaTotal := cpuSnap2.Total() - cpuSnap1.Total()
 	deltaIdle := cpuSnap2.IdleTime() - cpuSnap1.IdleTime()
 
@@ -37,12 +42,12 @@ func CalculateCpuUsage(cpuSnap1, cpuSnap2 CPUStats) float64 {
 	return float64(deltaTotal-deltaIdle) / float64(deltaTotal) * 100
 }
 
-func ReadCPUStats() (CPUStats, error) {
-	var cpuStats CPUStats
+func ReadCPUStatsRaw() (CPUStatsRaw, error) {
+	var cpuStats CPUStatsRaw
 
 	file, err := os.Open("/proc/stat")
 	if err != nil {
-		return CPUStats{}, err
+		return CPUStatsRaw{}, err
 	}
 	defer file.Close()
 
@@ -56,7 +61,7 @@ func ReadCPUStats() (CPUStats, error) {
 			fields := strings.Fields(line)
 
 			if len(fields) < 8 {
-				return CPUStats{}, fmt.Errorf("unecpected format in /proc/stat")
+				return CPUStatsRaw{}, fmt.Errorf("unecpected format in /proc/stat")
 			}
 
 			cpuStats.User, _ = strconv.ParseUint(fields[1], 10, 64)
@@ -70,5 +75,6 @@ func ReadCPUStats() (CPUStats, error) {
 			break
 		}
 	}
+
 	return cpuStats, nil
 }

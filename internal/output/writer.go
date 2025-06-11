@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/MarcusMJV/snapsys.git/internal/metrics"
 )
 
 type Snapshot struct {
-	Timestamp time.Time `json:"timestamp"`
-	CPUUsage  float64   `json:"cpu_usage"`
+	Timestamp time.Time           `json:"timestamp"`
+	CPU       metrics.CPUStats    `json:"cpu"`
+	Memory    metrics.MemoryStats `json:"memory"`
 }
 
 func (s *Snapshot) AppendSnapshotJSONL(filepath string) error {

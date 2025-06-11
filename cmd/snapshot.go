@@ -48,7 +48,7 @@ func runSnapshot() {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	prevCpuSnap, err := metrics.ReadCPUStats()
+	prevCpuSnap, err := metrics.ReadCPUStatsRaw()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -59,16 +59,23 @@ func runSnapshot() {
 			break
 		}
 
-		cpuSnap, err := metrics.ReadCPUStats()
+		cpuRaw, err := metrics.ReadCPUStatsRaw()
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		cpuUsage := metrics.CalculateCpuUsage(prevCpuSnap, cpuSnap)
-		prevCpuSnap = cpuSnap
-		fmt.Println("CPU Percentage: ", cpuUsage)
+		cpuUsage := metrics.CalculateCpuUsage(prevCpuSnap, cpuRaw)
+		cpuStats := metrics.CPUStats{UsagePct: cpuUsage, Raw: cpuRaw}
+		prevCpuSnap = cpuRaw
+		fmt.Println("CPU Percentage: ", cpuStats.UsagePct)
 
-		snapshot := output.Snapshot{Timestamp: now, CPUUsage: cpuUsage}
+		memoryStats, err := metrics.ReadMemStats()
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("Memory Percentage: ", memoryStats.UsagePct)
+
+		snapshot := output.Snapshot{Timestamp: now, CPU: cpuStats, Memory: memoryStats}
 		err = snapshot.AppendSnapshotJSONL(outputFile)
 
 		if err != nil {
