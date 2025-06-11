@@ -12,18 +12,16 @@ type Snapshot struct {
 	CPUUsage  float64   `json:"cpu_usage"`
 }
 
-func WriteSnapshotsToFile(snapshots []Snapshot, filepath string) error {
-	file, err := os.Create(filepath)
+func (s *Snapshot) AppendSnapshotJSONL(filepath string) error {
+	file, err := os.OpenFile(filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
 	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", " ")
-
-	if err := encoder.Encode(snapshots); err != nil {
-		return fmt.Errorf("failed to encode JSON: %w", err)
+	if err := encoder.Encode(s); err != nil {
+		return fmt.Errorf("flaied to write snaposhot: %w", err)
 	}
 
 	return nil

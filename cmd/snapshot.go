@@ -53,11 +53,9 @@ func runSnapshot() {
 		fmt.Println(err)
 	}
 
-	var snapshots []output.Snapshot
-
 	for now := range ticker.C {
 		if now.After(endTime) {
-			fmt.Println("Sbnap run completed")
+			fmt.Println("Snap run completed")
 			break
 		}
 
@@ -70,14 +68,15 @@ func runSnapshot() {
 		prevCpuSnap = cpuSnap
 		fmt.Println("CPU Percentage: ", cpuUsage)
 
-		snapshots = append(snapshots, output.Snapshot{Timestamp: now, CPUUsage: cpuUsage})
+		snapshot := output.Snapshot{Timestamp: now, CPUUsage: cpuUsage}
+		err = snapshot.AppendSnapshotJSONL(outputFile)
+
+		if err != nil {
+			fmt.Println(err)
+		}
 
 	}
 
-	if err := output.WriteSnapshotsToFile(snapshots, outputFile); err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("Output written to: ", outputFile)
-	}
+	fmt.Println("file created")
 
 }
