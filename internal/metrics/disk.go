@@ -105,7 +105,9 @@ func GetAllDisks() (DiskMap, error) {
 
 		stat, err := GetDiskUsage(mountpoint)
 		if err == nil {
-			disks[mountpoint] = stat
+			if stat.TotalKB != 0 {
+				disks[mountpoint] = stat
+			}
 		}
 	}
 	return disks, nil
