@@ -39,7 +39,7 @@ func init() {
 	rootCmd.AddCommand(snapshotCmd)
 	snapshotCmd.Flags().DurationVar(&interval, "interval", 5*time.Second, "Interval between snapshots")
 	snapshotCmd.Flags().DurationVar(&duration, "duration", 1*time.Minute, "Total duration to run snapshots")
-	snapshotCmd.Flags().StringVar(&outputFile, "output", "snapshot.json", "Output file path")
+	snapshotCmd.Flags().StringVar(&outputFile, "output", "snapshot.jsonl", "Output file path")
 }
 
 func runSnapshot() {
@@ -75,7 +75,18 @@ func runSnapshot() {
 		}
 		fmt.Println("Memory Percentage: ", memoryStats.UsagePct)
 
-		snapshot := output.Snapshot{Timestamp: now, CPU: cpuStats, Memory: memoryStats}
+		diskStas, err := metrics.GetAllDisks()
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("Got Disk Stats")
+
+		snapshot := output.Snapshot{
+			Timestamp: now,
+			CPU:       cpuStats,
+			Memory:    memoryStats,
+			Disks:     diskStas,
+		}
 		err = snapshot.AppendSnapshotJSONL(outputFile)
 
 		if err != nil {
