@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/MarcusMJV/snapsys.git/internal/metrics"
@@ -59,42 +60,69 @@ func runSnapshot() {
 			break
 		}
 
-		cpuRaw, err := metrics.ReadCPUStatsRaw()
-		if err != nil {
+		var wg sync.WaitGroup
+		wg.Add(3)
+		errChan := make(chan error, 1)
+		fmt.Println("channels made")
+		cpuChan := make(chan metrics.CPUStats, 1)
+		memChan := make(chan metrics.MemoryStats, 1)
+		diskChan := make(chan metrics.DiskMap, 1)
+
+		go func() {
+			defer wg.Done()
+			cpu, err := metrics.ReadCPU(&prevCpuSnap)
+			fmt.Println("cpu read")
+			if err != nil {
+				fmt.Println(err)
+				errChan <- err
+			}
+			cpuChan <- cpu
+		}()
+		go func() {
+			defer wg.Done()
+			memory, err := metrics.ReadMemStats()
+			fmt.Println("memory read")
+			if err != nil {
+				errChan <- err
+			}
+			memChan <- memory
+		}()
+		go func() {
+			defer wg.Done()
+			disks, err := metrics.GetAllDisks()
+			fmt.Println("disks read")
+			if err != nil {
+				errChan <- err
+			}
+			diskChan <- disks
+		}()
+		wg.Wait()
+
+		close(errChan)
+
+		var hasError bool
+		for err := range errChan {
 			fmt.Println(err)
+			hasError = true
 		}
 
-		cpuUsage := metrics.CalculateCpuUsage(prevCpuSnap, cpuRaw)
-		cpuStats := metrics.CPUStats{UsagePct: cpuUsage, Raw: cpuRaw}
-		prevCpuSnap = cpuRaw
-		fmt.Println("CPU Percentage: ", cpuStats.UsagePct)
-
-		memoryStats, err := metrics.ReadMemStats()
-		if err != nil {
-			fmt.Println(err)
+		if hasError {
+			fmt.Println("Aborting snapshot run.")
+			break
 		}
-		fmt.Println("Memory Percentage: ", memoryStats.UsagePct)
-
-		diskStas, err := metrics.GetAllDisks()
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println("Got Disk Stats")
 
 		snapshot := output.Snapshot{
 			Timestamp: now,
-			CPU:       cpuStats,
-			Memory:    memoryStats,
-			Disks:     diskStas,
+			CPU:       <-cpuChan,
+			Memory:    <-memChan,
+			Disks:     <-diskChan,
 		}
-		err = snapshot.AppendSnapshotJSONL(outputFile)
 
+		err = snapshot.AppendSnapshotJSONL(outputFile)
+		fmt.Println("wrote snapshot")
 		if err != nil {
 			fmt.Println(err)
 		}
 
 	}
-
-	fmt.Println("file created")
-
 }

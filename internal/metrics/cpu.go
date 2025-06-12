@@ -23,6 +23,18 @@ type CPUStatsRaw struct {
 	SoftIRQ uint64 `json:"softirq"`
 }
 
+func ReadCPU(prevCpuSnap *CPUStatsRaw) (CPUStats, error) {
+	cpuRaw, err := ReadCPUStatsRaw()
+	if err != nil {
+		return CPUStats{}, err
+	}
+
+	cpuUsage := CalculateCpuUsage(prevCpuSnap, &cpuRaw)
+
+	prevCpuSnap = &cpuRaw
+	return CPUStats{UsagePct: cpuUsage, Raw: cpuRaw}, nil
+}
+
 func (cpu *CPUStatsRaw) Total() uint64 {
 	return cpu.User + cpu.Nice + cpu.System + cpu.Idle + cpu.IOWait + cpu.IRQ + cpu.SoftIRQ
 }
@@ -31,7 +43,7 @@ func (cpu *CPUStatsRaw) IdleTime() uint64 {
 	return cpu.Idle + cpu.IOWait
 }
 
-func CalculateCpuUsage(cpuSnap1, cpuSnap2 CPUStatsRaw) float64 {
+func CalculateCpuUsage(cpuSnap1, cpuSnap2 *CPUStatsRaw) float64 {
 	deltaTotal := cpuSnap2.Total() - cpuSnap1.Total()
 	deltaIdle := cpuSnap2.IdleTime() - cpuSnap1.IdleTime()
 
