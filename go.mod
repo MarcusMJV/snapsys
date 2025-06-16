@@ -1,4 +1,4 @@
-module github.com/MarcusMJV/snapsys.git
+module github.com/MarcusMJV/snapsys
 
 go 1.23.0
 
