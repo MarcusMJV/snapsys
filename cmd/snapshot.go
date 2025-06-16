@@ -69,7 +69,7 @@ func runSnapshot() {
 			break
 		}
 
-		hasError := output.TakeSnapshot(prevCpuSnap, outputFile, now)
+		hasError := output.TakeSnapshot(&prevCpuSnap, outputFile, now)
 		if hasError {
 			fmt.Println(red + "ERROR: Snapshot failed - aborting." + reset)
 			break

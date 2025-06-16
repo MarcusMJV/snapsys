@@ -17,7 +17,7 @@ type Snapshot struct {
 	Disks     metrics.DiskMap     `json:"disks"`
 }
 
-func TakeSnapshot(prevCpuSnap metrics.CPUStatsRaw, outputFile string, now time.Time) bool {
+func TakeSnapshot(prevCpuSnap *metrics.CPUStatsRaw, outputFile string, now time.Time) bool {
 	var wg sync.WaitGroup
 	wg.Add(3)
 	errChan := make(chan error, 3)
@@ -27,7 +27,7 @@ func TakeSnapshot(prevCpuSnap metrics.CPUStatsRaw, outputFile string, now time.T
 
 	go func() {
 		defer wg.Done()
-		cpu, err := metrics.ReadCPU(&prevCpuSnap)
+		cpu, err := metrics.ReadCPU(prevCpuSnap)
 		if err != nil {
 			errChan <- fmt.Errorf("CPU: %w", err)
 		}

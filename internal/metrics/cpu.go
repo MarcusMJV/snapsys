@@ -31,7 +31,7 @@ func ReadCPU(prevCpuSnap *CPUStatsRaw) (CPUStats, error) {
 
 	cpuUsage := CalculateCpuUsage(prevCpuSnap, &cpuRaw)
 
-	prevCpuSnap = &cpuRaw
+	*prevCpuSnap = cpuRaw
 	return CPUStats{UsagePct: cpuUsage, Raw: cpuRaw}, nil
 }
 
