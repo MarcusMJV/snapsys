@@ -28,6 +28,25 @@ Once installed, use it like:
 ```bash
 snapsys snapshot
 ```
+## Download a Precompiled Binary
+
+Visit the Releases Page
+
+Download the binary called snapsys
+
+In your terminal run
+```bash
+chmod +x snapsys
+```
+Run it:
+```bash
+./snapsys snapshot
+```
+To simplify usage:
+```bash
+sudo mv snapsys /usr/local/bin/snapsys
+snapsys snapshot
+```
 
 ---
 
@@ -90,10 +109,10 @@ This is great for:
 
 * Sub-second snapshot support using concurrent snapshot routines
 * Additional system metrics:
-    Uptime
-    Hostname and kernel version
-    Network interface stats (bytes in/out, errors, drops)
-    System load average
+    - Uptime
+    - Hostname and kernel version
+    - Network interface stats (bytes in/out, errors, drops)
+    - System load average
 
 * Snapshot tagging and summaries
 * Ability to push .jsonl data to remote HTTP APIs
