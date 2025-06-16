@@ -7,6 +7,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/MarcusMJV/snapsys.git/internal/metrics"
@@ -50,10 +52,27 @@ func init() {
 	rootCmd.AddCommand(snapshotCmd)
 	snapshotCmd.Flags().DurationVar(&interval, "interval", 3*time.Second, "Interval between snapshots")
 	snapshotCmd.Flags().DurationVar(&duration, "duration", 30*time.Second, "Total duration to run snapshots")
-	snapshotCmd.Flags().StringVar(&outputFile, "output", "snapshot.jsonl", "Output file path")
+	snapshotCmd.Flags().StringVar(&outputFile, "output", "", "Output file path (defaults to snapsys_runs/snaprun_TIMESTAMP.jsonl)")
 }
 
 func runSnapshot() {
+	if interval < time.Second {
+		fmt.Println(green + "Minimum supported interval is 1s. Using 1s instead." + reset)
+		interval = time.Second
+	}
+	if outputFile == "" {
+		defaultPath, err := getDefaultOutputPath()
+		if err != nil {
+			fmt.Println("Failed to determine output file path:", err)
+			os.Exit(1)
+		}
+		outputFile = defaultPath
+		fmt.Println("No output specified. Using:", outputFile)
+	}
+	if filepath.Ext(outputFile) != ".jsonl" {
+		fmt.Println(red + "ERROR: Output file must have a '.jsonl' extension." + reset)
+		os.Exit(1)
+	}
 
 	endTime := time.Now().Add(duration)
 	ticker := time.NewTicker(interval)
@@ -81,4 +100,16 @@ func runSnapshot() {
 		fmt.Println(blue + "SNAP: " + now.Local().Format("2006-01-02 15:04:05") + reset)
 
 	}
+}
+
+func getDefaultOutputPath() (string, error) {
+	folder := "snapsys_runs"
+	err := os.MkdirAll(folder, 0755)
+	if err != nil {
+		return "", err
+	}
+
+	timestamp := time.Now().Format("2006-01-02_15-04-05")
+	filename := "snaprun_" + timestamp + ".jsonl"
+	return filepath.Join(folder, filename), nil
 }
