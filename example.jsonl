@@ -1,0 +1,29 @@
+{
+  "timestamp": "2025-06-16T13:00:00Z",
+  "cpu": {
+    "usage_pct": 12.3,
+    "raw": {
+      "user": 192832,
+      "system": 158093,
+      "idle": 2489350,
+      "iowait": 813747
+    }
+  },
+  "memory": {
+    "usage_pct": 33.3,
+    "raw": {
+      "mem_total_kb": 11094936,
+      "mem_used_kb": 3698000,
+      "mem_available_kb": 7397000
+    }
+  },
+  "disks": {
+    "/": {
+      "mount": "/",
+      "usage_pct": 10.3,
+      "total_kb": 82701616,
+      "used_kb": 8594048,
+      "free_kb": 74107568
+    }
+  }
+}
