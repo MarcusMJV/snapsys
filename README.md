@@ -1,6 +1,11 @@
 # SnapSys
 
-SnapSys is a simple, lightweight CLI tool for capturing CPU, memory, and disk usage over time. It’s designed for system administrators, developers, and performance testers who want to collect system metrics at fixed intervals in a clean JSONL format.
+![Go](https://img.shields.io/badge/Go-1.23+-blue?logo=go&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Linux-success?logo=linux&logoColor=white)
+
+SnapSys is a lightweight, purpose-built CLI tool for capturing CPU, memory, and disk usage at fixed intervals, outputting the results in clean, structured JSONL format. Designed for system administrators, developers, DevOps engineers, and performance testers, SnapSys is ideal for monitoring system behavior, debugging performance issues, or capturing lightweight metrics during CI/CD pipelines or local build processes. Whether you're analyzing resource usage in virtual machines, testing workloads in Docker containers, or gathering evidence for incident reports, SnapSys fits seamlessly into your workflow.
+
+> ⚠️ SnapSys is currently developed and tested for Linux systems only.
 
 ## Key Features
 
