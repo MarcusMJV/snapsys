@@ -86,12 +86,6 @@ This is great for:
 
 ---
 
-## License
-
-MIT License. Built by Marcus Vorster (2025).
-
----
-
 ## Future Plans
 
 * Sub-second snapshot support using concurrent snapshot routines
