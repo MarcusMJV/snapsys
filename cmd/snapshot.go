@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/MarcusMJV/snapsys.git/internal/metrics"
-	"github.com/MarcusMJV/snapsys.git/internal/output"
+	"github.com/MarcusMJV/snapsys/internal/metrics"
+	"github.com/MarcusMJV/snapsys/internal/output"
 	"github.com/spf13/cobra"
 )
 

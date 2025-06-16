@@ -1,10 +1,9 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package main
 
-import "github.com/MarcusMJV/snapsys.git/cmd"
+import "github.com/MarcusMJV/snapsys/cmd"
 
 func main() {
 	cmd.Execute()

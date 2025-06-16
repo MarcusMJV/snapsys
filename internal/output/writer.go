@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/MarcusMJV/snapsys.git/internal/metrics"
+	"github.com/MarcusMJV/snapsys/internal/metrics"
 )
 
 type Snapshot struct {
