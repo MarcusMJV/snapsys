@@ -1,6 +1,7 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
+SnapSys - Lightweight System Benchmarking Tool
+Copyright © 2025 Marcus Vorster
+Released under the MIT License
 */
 package cmd
 
@@ -10,25 +11,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var version = "v0.1.0"
 
-
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "snapsys.git",
-	Short: "SnapSys is a lighweight system benchmarking tool",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Use:   "snapsys",
+	Short: "SnapSys is a lightweight system benchmarking tool",
+	Long: `SnapSys is a terminal-based benchmarking utility that captures snapshots of 
+CPU, memory, and disk usage over time. It's ideal for developers, sysadmins, 
+and power users who need a fast, minimal way to log system performance.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+Usage Examples:
+
+  snapsys snapshot --duration 60s --interval 5s --output stats.jsonl
+
+This command captures system metrics every 5 seconds for 60 seconds and
+writes the output to 'stats.jsonl' in JSON Lines format.`,
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -37,15 +36,7 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.snapsys.git.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
+	rootCmd.Version = version
+	rootCmd.SetVersionTemplate("SnapSys version: {{.Version}}\n")
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-

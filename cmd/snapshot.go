@@ -1,5 +1,7 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
+SnapSys - Lightweight System Benchmarking Tool
+Copyright © 2025 Marcus Vorster
+Released under the MIT License
 */
 package cmd
 
@@ -29,23 +31,25 @@ const (
 // snapshotCmd represents the snapshot command
 var snapshotCmd = &cobra.Command{
 	Use:   "snapshot",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Capture system metrics over a time period",
+	Long: `The 'snapshot' command collects CPU, memory, and disk usage statistics 
+at fixed intervals over a specified duration.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Examples:
+  snapsys snapshot --duration 30s --interval 5s --output stats.jsonl
+
+This will record system metrics every 5 seconds for 30 seconds and save 
+them to 'stats.jsonl' in JSONL format.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("snapshot called")
+		fmt.Println("Starting snapshot run...")
 		runSnapshot()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(snapshotCmd)
-	snapshotCmd.Flags().DurationVar(&interval, "interval", 5*time.Second, "Interval between snapshots")
-	snapshotCmd.Flags().DurationVar(&duration, "duration", 1*time.Minute, "Total duration to run snapshots")
+	snapshotCmd.Flags().DurationVar(&interval, "interval", 3*time.Second, "Interval between snapshots")
+	snapshotCmd.Flags().DurationVar(&duration, "duration", 30*time.Second, "Total duration to run snapshots")
 	snapshotCmd.Flags().StringVar(&outputFile, "output", "snapshot.jsonl", "Output file path")
 }
 
