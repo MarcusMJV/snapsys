@@ -19,7 +19,7 @@ SnapSys is a lightweight, purpose-built CLI tool for capturing CPU, memory, and 
 To install the latest version:
 
 ```bash
-go install github.com/MarcusMJV/snapsys.git@latest
+go install github.com/MarcusMJV/snapsys@latest
 ```
 
 Ensure `~/go/bin` is in your `$PATH`:
