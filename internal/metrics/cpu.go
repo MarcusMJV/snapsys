@@ -1,6 +1,11 @@
 package metrics
 
+/*
+#cgo CFLAGS: -I../../native
+#include "metric_readers.h"
+*/
 import (
+	"C"
 	"bufio"
 	"fmt"
 	"os"
@@ -53,6 +58,20 @@ func CalculateCpuUsage(cpuSnap1, cpuSnap2 *CPUStatsRaw) float64 {
 
 	return float64(deltaTotal-deltaIdle) / float64(deltaTotal) * 100
 }
+
+// func ReadCPUStatsRawC() CPUStatsRaw {
+// 	raw := C.read_proc_stat()
+
+// 	return CPUStatsRaw{
+// 		User:    uint64(raw.user),
+// 		Nice:    uint64(raw.nice),
+// 		System:  uint64(raw.system),
+// 		Idle:    uint64(raw.idle),
+// 		IOWait:  uint64(raw.iowait),
+// 		IRQ:     uint64(raw.irq),
+// 		SoftIRQ: uint64(raw.softirq),
+// 	}
+// }
 
 func ReadCPUStatsRaw() (CPUStatsRaw, error) {
 	var cpuStats CPUStatsRaw
