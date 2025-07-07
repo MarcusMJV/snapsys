@@ -4,6 +4,15 @@
 #include <stdint.h>
 
 typedef struct{
+    uint64_t mem_total;
+    uint64_t mem_free;
+    uint64_t bufffers;
+    uint64_t cached;
+} MemoryStatsRaw;
+
+MemoryStatsRaw read_proc_meminfo();
+
+typedef struct{
     uint64_t user;
     uint64_t nice;
     uint64_t system;

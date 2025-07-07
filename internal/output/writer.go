@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/MarcusMJV/snapsys/internal/metrics"
+	"github.com/MarcusMJV/snapsys/native"
 )
 
 type Snapshot struct {
@@ -17,7 +18,7 @@ type Snapshot struct {
 	Disks     metrics.DiskMap     `json:"disks"`
 }
 
-func TakeSnapshot(prevCpuSnap *metrics.CPUStatsRaw, outputFile string, now time.Time) bool {
+func TakeSnapshot(prevCpuSnap *native.CPUStatsRaw, outputFile string, now time.Time) bool {
 	var wg sync.WaitGroup
 	wg.Add(3)
 	errChan := make(chan error, 3)

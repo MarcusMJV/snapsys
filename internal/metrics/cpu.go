@@ -1,38 +1,36 @@
 package metrics
 
-/*
-#cgo CFLAGS: -I../../native
-#include "metric_readers.h"
-*/
 import (
-	"C"
 	"bufio"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/MarcusMJV/snapsys/native"
 )
 
 type CPUStats struct {
-	UsagePct float64     `json:"usage_pct"`
-	Raw      CPUStatsRaw `json:"raw"`
+	UsagePct float64            `json:"usage_pct"`
+	Raw      native.CPUStatsRaw `json:"raw"`
 }
 
-type CPUStatsRaw struct {
-	User    uint64 `json:"user"`
-	Nice    uint64 `json:"nice"`
-	System  uint64 `json:"system"`
-	Idle    uint64 `json:"idle"`
-	IOWait  uint64 `json:"iowait"`
-	IRQ     uint64 `json:"irq"`
-	SoftIRQ uint64 `json:"softirq"`
-}
+// type native.CPUStatsRaw struct {
+// 	User    uint64 `json:"user"`
+// 	Nice    uint64 `json:"nice"`
+// 	System  uint64 `json:"system"`
+// 	Idle    uint64 `json:"idle"`
+// 	IOWait  uint64 `json:"iowait"`
+// 	IRQ     uint64 `json:"irq"`
+// 	SoftIRQ uint64 `json:"softirq"`
+// }
 
-func ReadCPU(prevCpuSnap *CPUStatsRaw) (CPUStats, error) {
-	cpuRaw, err := ReadCPUStatsRaw()
-	if err != nil {
-		return CPUStats{}, err
-	}
+func ReadCPU(prevCpuSnap *native.CPUStatsRaw) (CPUStats, error) {
+	// cpuRaw, err := Readnative.CPUStatsRaw()
+	// if err != nil {
+	// 	return CPUStats{}, err
+	// }
+	cpuRaw := native.ReadCPUStatsRawC()
 
 	cpuUsage := CalculateCpuUsage(prevCpuSnap, &cpuRaw)
 
@@ -40,15 +38,7 @@ func ReadCPU(prevCpuSnap *CPUStatsRaw) (CPUStats, error) {
 	return CPUStats{UsagePct: cpuUsage, Raw: cpuRaw}, nil
 }
 
-func (cpu *CPUStatsRaw) Total() uint64 {
-	return cpu.User + cpu.Nice + cpu.System + cpu.Idle + cpu.IOWait + cpu.IRQ + cpu.SoftIRQ
-}
-
-func (cpu *CPUStatsRaw) IdleTime() uint64 {
-	return cpu.Idle + cpu.IOWait
-}
-
-func CalculateCpuUsage(cpuSnap1, cpuSnap2 *CPUStatsRaw) float64 {
+func CalculateCpuUsage(cpuSnap1, cpuSnap2 *native.CPUStatsRaw) float64 {
 	deltaTotal := cpuSnap2.Total() - cpuSnap1.Total()
 	deltaIdle := cpuSnap2.IdleTime() - cpuSnap1.IdleTime()
 
@@ -59,26 +49,12 @@ func CalculateCpuUsage(cpuSnap1, cpuSnap2 *CPUStatsRaw) float64 {
 	return float64(deltaTotal-deltaIdle) / float64(deltaTotal) * 100
 }
 
-// func ReadCPUStatsRawC() CPUStatsRaw {
-// 	raw := C.read_proc_stat()
-
-// 	return CPUStatsRaw{
-// 		User:    uint64(raw.user),
-// 		Nice:    uint64(raw.nice),
-// 		System:  uint64(raw.system),
-// 		Idle:    uint64(raw.idle),
-// 		IOWait:  uint64(raw.iowait),
-// 		IRQ:     uint64(raw.irq),
-// 		SoftIRQ: uint64(raw.softirq),
-// 	}
-// }
-
-func ReadCPUStatsRaw() (CPUStatsRaw, error) {
-	var cpuStats CPUStatsRaw
+func ReadCPUStatsRaw() (native.CPUStatsRaw, error) {
+	var cpuStats native.CPUStatsRaw
 
 	file, err := os.Open("/proc/stat")
 	if err != nil {
-		return CPUStatsRaw{}, err
+		return native.CPUStatsRaw{}, err
 	}
 	defer file.Close()
 
@@ -92,7 +68,7 @@ func ReadCPUStatsRaw() (CPUStatsRaw, error) {
 			fields := strings.Fields(line)
 
 			if len(fields) < 8 {
-				return CPUStatsRaw{}, fmt.Errorf("unecpected format in /proc/stat")
+				return native.CPUStatsRaw{}, fmt.Errorf("unecpected format in /proc/stat")
 			}
 
 			cpuStats.User, _ = strconv.ParseUint(fields[1], 10, 64)
