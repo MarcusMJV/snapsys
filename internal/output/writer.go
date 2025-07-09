@@ -1,7 +1,6 @@
 package output
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"sync"
@@ -16,6 +15,34 @@ type Snapshot struct {
 	CPU       metrics.CPUStats    `json:"cpu"`
 	Memory    metrics.MemoryStats `json:"memory"`
 	Disks     metrics.DiskMap     `json:"disks"`
+}
+
+var (
+	bufferedJSONLWriter *BufferedJSONLWriter
+)
+
+func InitWriter(path string, buffersize int) error {
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+
+	bufferedJSONLWriter = NewBufferedJSONLWriter(file, buffersize)
+	return nil
+}
+
+func FlushWriter() error {
+	if bufferedJSONLWriter != nil {
+		return bufferedJSONLWriter.Flush()
+	}
+	return nil
+}
+
+func CloseWriter() error {
+	if bufferedJSONLWriter != nil {
+		return bufferedJSONLWriter.Close()
+	}
+	return nil
 }
 
 func TakeSnapshot(prevCpuSnap *native.CPUStatsRaw, outputFile string, now time.Time) bool {
@@ -71,26 +98,32 @@ func TakeSnapshot(prevCpuSnap *native.CPUStatsRaw, outputFile string, now time.T
 		Disks:     <-diskChan,
 	}
 
-	err := snapshot.AppendSnapshotJSONL(outputFile)
+	err := bufferedJSONLWriter.WriteSnapshot(snapshot)
 	if err != nil {
 		fmt.Println(err)
 		return true
 	}
 
+	// err := snapshot.AppendSnapshotJSONL(outputFile)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return true
+	// }
+
 	return false
 }
 
-func (s *Snapshot) AppendSnapshotJSONL(filepath string) error {
-	file, err := os.OpenFile(filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+// func (s *Snapshot) AppendSnapshotJSONL(filepath string) error {
+// 	file, err := os.OpenFile(filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer file.Close()
 
-	encoder := json.NewEncoder(file)
-	if err := encoder.Encode(s); err != nil {
-		return fmt.Errorf("flaied to write snaposhot: %w", err)
-	}
+// 	encoder := json.NewEncoder(file)
+// 	if err := encoder.Encode(s); err != nil {
+// 		return fmt.Errorf("flaied to write snaposhot: %w", err)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

@@ -15,6 +15,27 @@ type CPUStatsRaw struct {
 	SoftIRQ uint64 `json:"softirq"`
 }
 
+type MemoryStatsRaw struct {
+	MemTotal     uint64 `json:"mem_total"`
+	MemFree      uint64 `json:"mem_free"`
+	MemAvailable uint64 `json:"mem_available"`
+	Buffers      uint64 `json:"buffers"`
+	Cached       uint64 `json:"cached"`
+}
+
+func ReadMemStatsRawC() MemoryStatsRaw {
+	raw := C.read_proc_meminfo()
+
+	return MemoryStatsRaw{
+		MemTotal:     uint64(raw.mem_total),
+		MemFree:      uint64(raw.mem_free),
+		MemAvailable: uint64(raw.mem_available),
+		Buffers:      uint64(raw.buffers),
+		Cached:       uint64(raw.cached),
+	}
+
+}
+
 func (cpu *CPUStatsRaw) Total() uint64 {
 	return cpu.User + cpu.Nice + cpu.System + cpu.Idle + cpu.IOWait + cpu.IRQ + cpu.SoftIRQ
 }

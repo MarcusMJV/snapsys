@@ -6,7 +6,8 @@
 typedef struct{
     uint64_t mem_total;
     uint64_t mem_free;
-    uint64_t bufffers;
+    uint64_t mem_available;
+    uint64_t buffers;
     uint64_t cached;
 } MemoryStatsRaw;
 

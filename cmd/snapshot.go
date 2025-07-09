@@ -56,10 +56,10 @@ func init() {
 }
 
 func runSnapshot() {
-	if interval < time.Second {
-		fmt.Println(green + "Minimum supported interval is 1s. Using 1s instead." + reset)
-		interval = time.Second
-	}
+	// if interval < time.Second {
+	// 	fmt.Println(green + "Minimum supported interval is 1s. Using 1s instead." + reset)
+	// 	interval = time.Second
+	// }
 	if outputFile == "" {
 		defaultPath, err := getDefaultOutputPath()
 		if err != nil {
@@ -86,6 +86,10 @@ func runSnapshot() {
 	}
 
 	fmt.Println(green + "SNAP RUN STARTED" + reset)
+
+	output.InitWriter(outputFile, 128*1024)
+	defer output.CloseWriter()
+
 	for now := range ticker.C {
 		if now.After(endTime) {
 			fmt.Println(green + "SNAP RUN COMPLETED" + reset)
