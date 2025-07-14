@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/MarcusMJV/snapsys/native"
 	"golang.org/x/sys/unix"
 )
 
@@ -17,9 +18,10 @@ type DiskStats struct {
 	FreeKB     uint64  `json:"free_kb"`
 }
 
-type DiskMap map[string]DiskStats
+type DiskMap map[string]native.DiskStats
 
 /*
+read_disk_stats
 Ignore:
 - Virtual filesystems
 - Temporary mounts
@@ -103,7 +105,7 @@ func GetAllDisks() (DiskMap, error) {
 			continue
 		}
 
-		stat, err := GetDiskUsage(mountpoint)
+		stat, err := native.GetDiskUsage(mountpoint)
 		if err == nil {
 			if stat.TotalKB != 0 {
 				disks[mountpoint] = stat

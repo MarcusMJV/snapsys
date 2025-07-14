@@ -3,6 +3,16 @@
 
 #include <stdint.h>
 
+typedef struct {
+    float usage_pct;
+    uint64_t total_kb;
+    uint64_t used_kb;
+    uint64_t free_kb;
+    int success;
+} DiskStats;
+
+int read_disk_stats(char *mount, DiskStats *result);
+
 typedef struct{
     uint64_t mem_total;
     uint64_t mem_free;

@@ -1,9 +1,14 @@
 package native
 
 /*
+#include <stdlib.h>
 #include "metric_readers.h"
 */
 import "C"
+import (
+	"fmt"
+	"unsafe"
+)
 
 type CPUStatsRaw struct {
 	User    uint64 `json:"user"`
@@ -23,17 +28,11 @@ type MemoryStatsRaw struct {
 	Cached       uint64 `json:"cached"`
 }
 
-func ReadMemStatsRawC() MemoryStatsRaw {
-	raw := C.read_proc_meminfo()
-
-	return MemoryStatsRaw{
-		MemTotal:     uint64(raw.mem_total),
-		MemFree:      uint64(raw.mem_free),
-		MemAvailable: uint64(raw.mem_available),
-		Buffers:      uint64(raw.buffers),
-		Cached:       uint64(raw.cached),
-	}
-
+type DiskStats struct {
+	UsagePct float32 `json:"usage_pct"`
+	TotalKB  uint64  `json:"total_kb"`
+	UsedKB   uint64  `json:"used_kb"`
+	FreeKB   uint64  `json:"free_kb"`
 }
 
 func (cpu *CPUStatsRaw) Total() uint64 {
@@ -56,4 +55,35 @@ func ReadCPUStatsRawC() CPUStatsRaw {
 		IRQ:     uint64(raw.irq),
 		SoftIRQ: uint64(raw.softirq),
 	}
+}
+
+func ReadMemStatsRawC() MemoryStatsRaw {
+	raw := C.read_proc_meminfo()
+
+	return MemoryStatsRaw{
+		MemTotal:     uint64(raw.mem_total),
+		MemFree:      uint64(raw.mem_free),
+		MemAvailable: uint64(raw.mem_available),
+		Buffers:      uint64(raw.buffers),
+		Cached:       uint64(raw.cached),
+	}
+
+}
+
+func GetDiskUsage(mountpoint string) (DiskStats, error) {
+	cstr := C.CString(mountpoint)
+	defer C.free(unsafe.Pointer(cstr))
+
+	var result C.DiskStats
+	status := C.read_disk_stats(cstr, &result)
+	if status != 0 || result.success == 0 {
+		return DiskStats{}, fmt.Errorf("statfs failed fot %s", mountpoint)
+	}
+
+	return DiskStats{
+		TotalKB:  uint64(result.total_kb),
+		UsedKB:   uint64(result.used_kb),
+		FreeKB:   uint64(result.free_kb),
+		UsagePct: float32(result.usage_pct),
+	}, nil
 }
