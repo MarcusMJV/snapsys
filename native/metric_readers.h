@@ -4,6 +4,16 @@
 #include <stdint.h>
 
 typedef struct {
+    char interface[32];
+    uint64_t rx_bytes;
+    uint64_t rx_packets;
+    uint64_t tx_bytes;
+    uint64_t tx_packets;
+} InterfaceStats;
+
+int read_network_interfaces(InterfaceStats *stats, int max_interfaces);
+
+typedef struct {
     float usage_pct;
     uint64_t total_kb;
     uint64_t used_kb;

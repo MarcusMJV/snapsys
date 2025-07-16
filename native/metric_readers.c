@@ -4,6 +4,21 @@
 #include <sys/statfs.h>
 #include "metric_readers.h"
 
+int read_network_interfaces(InterfaceStats *stats, int max_interfaces){
+    FILE *fp = fopen("/proc/net/dev", "r");
+    if(!fp){
+        perror("Failed to open /proc/net/dev");
+        return -1;
+    }
+
+    char line[512];
+    int count = 0;
+
+    fgets(line, sizeof(line), fp);
+    fgets(line, sizeof(line), fp);
+    return 0;
+}
+
 int read_disk_stats(char *mount, DiskStats *result){
     struct statfs s;
     if(statfs(mount, &s) != 0){
