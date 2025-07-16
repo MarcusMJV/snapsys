@@ -14,8 +14,21 @@ int read_network_interfaces(InterfaceStats *stats, int max_interfaces){
     char line[512];
     int count = 0;
 
+    //skip frst two header lines
     fgets(line, sizeof(line), fp);
     fgets(line, sizeof(line), fp);
+
+    while(fgets(line, sizeof(line), fp) && count < max_interfaces){
+        char *colon = strchr(line, ':');
+        if (!colon) continue;
+
+        *colon = '\0';
+        char iface[32];
+
+        sscanf(line, "%s", iface);
+        
+    }
+
     return 0;
 }
 
